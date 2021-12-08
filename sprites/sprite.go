@@ -87,14 +87,33 @@ func (ss *Spritesheet) GridPoint(tx, ty int) image.Point {
   //}
 }
 
-func (ss *Spritesheet) NewSprite(id int) *Sprite {
+func (ss *Spritesheet) NewTile(id int) *Tile {
   r := ss.SpriteBounds(id)
 
-  s := Sprite{
+  t := Tile{
     ss: ss,
     subImage: ss.tiles.SubImage(r).(*ebiten.Image),
     id: id,
   }
+
+  return &t
+}
+
+
+func (ss *Spritesheet) NewSprite(id int) *Sprite {
+  r := ss.SpriteBounds(id)
+
+  t := Tile{
+    ss: ss,
+    subImage: ss.tiles.SubImage(r).(*ebiten.Image),
+    id: id,
+  }
+
+  s := Sprite{
+    ss: ss,
+    tiles: make([]*Tile, 0),
+  }
+  s.tiles = append(s.tiles, &t)
 
   return &s
 }
@@ -102,21 +121,44 @@ func (ss *Spritesheet) NewSprite(id int) *Sprite {
 // =================================================================================================================
 
 
-type Sprite struct {
+type Tile struct {
   ss        *Spritesheet
   subImage  *ebiten.Image
   id        int
 }
 
-func (s *Sprite) GridDraw(screen *ebiten.Image, tx,ty int)  {
-  x,y := xy(s.ss.GridPoint(tx, ty))
+func (t *Tile) GridDraw(screen *ebiten.Image, tx,ty int)  {
+  x,y := xy(t.ss.GridPoint(tx, ty))
   op := &ebiten.DrawImageOptions{}
   op.GeoM.Translate(float64(x), float64(y))
 
-  screen.DrawImage(s.subImage, op)
+  screen.DrawImage(t.subImage, op)
 }
 
 
+// =================================================================================================================
+
+
+type Sprite struct {
+  ss        *Spritesheet
+  tiles   []*Tile
+}
+
+func (s *Sprite) GridDraw(screen *ebiten.Image, tx,ty int)  {
+  //x,y := xy(s.ss.GridPoint(tx, ty))
+  //op := &ebiten.DrawImageOptions{}
+  //op.GeoM.Translate(float64(x), float64(y))
+
+  for _, tile := range s.tiles {
+    tile.GridDraw(screen, tx,ty)
+  }
+}
+
+
+
+
+
+// =================================================================================================================
 
 
 func check(err error) {
