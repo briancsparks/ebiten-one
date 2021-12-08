@@ -40,14 +40,56 @@ type Spritesheet struct {
 
   // Width, height in tiles
   tileXNum int
-  //tileYNum int
+  tileYNum int
 }
 
 func xy(p image.Point) (int, int) {
   return p.X, p.Y
 }
 
-func NewSpritesheet(buf []byte, twidth, theight, tilexnum int, grid *Grid) *Spritesheet {
+func NewSpritesheet(buf []byte, twidth, theight, tilexnum, tileynum int, grid *Grid) *Spritesheet {
+  tilesIm, _, err := image.Decode(bytes.NewReader(buf))
+  check(err)
+
+  width, height := xy(tilesIm.Bounds().Size())
+
+  ss := Spritesheet{
+    tiles:      ebiten.NewImageFromImage(tilesIm),
+    grid:       grid,
+    width:      width,
+    height:     height,
+    tileWidth:  twidth,
+    tileHeight: theight,
+    tileXNum:   tilexnum,       /*width  / twidth*/
+    tileYNum:   tileynum,       /*height / theight*/
+  }
+
+  fmt.Printf("image: (%3d,%3d), user-tile: (%2d,%2d), user: %2d, calc: %2d / user: %2d, calc: %2d\n", width, height, ss.tileWidth, ss.tileHeight, ss.tileXNum, width / twidth, ss.tileYNum, height / theight)
+
+  return &ss
+
+
+
+
+
+  //ss := Spritesheet{
+  //  tiles:      ebiten.NewImageFromImage(tilesIm),
+  //  grid:       grid,
+  //  width:      width,
+  //  height:     height,
+  //  tileWidth:  twidth,
+  //  tileHeight: theight,
+  //  tileXNum:   tilexnum,       /*width / twidth*/
+  //  //tileYNum:   height / theight,
+  //}
+  //
+  //fmt.Printf("image: (%3d,%3d), user-tile: (%2d,%2d), user: %2d, calc: %2d\n", width, height, ss.tileWidth, ss.tileHeight, ss.tileXNum, width / twidth)
+  //
+  //return &ss
+}
+
+
+func NewSpritesheet0(buf []byte, twidth, theight, tilexnum int, grid *Grid) *Spritesheet {
   tilesIm, _, err := image.Decode(bytes.NewReader(buf))
   check(err)
 
@@ -144,7 +186,7 @@ type Sprite struct {
   tiles   []*Tile
 }
 
-func (s *Sprite) GridDraw(screen *ebiten.Image, tx,ty int)  {
+func (s *Sprite) GridDraw(g *Game, screen *ebiten.Image, tx,ty int)  {
   //x,y := xy(s.ss.GridPoint(tx, ty))
   //op := &ebiten.DrawImageOptions{}
   //op.GeoM.Translate(float64(x), float64(y))

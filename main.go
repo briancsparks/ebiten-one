@@ -17,10 +17,12 @@ const (
   ss1TileWidth  = 18
   ss1TileHeight = 18
   ss1TileXNum   = 20
+  ss1TileYNum   = 9
 
   ss2TileWidth  = 24
   ss2TileHeight = 24
   ss2TileXNum   = 9
+  ss2TileYNum   = 3
 )
 
 //go:embed assets/tiles_packed.png
@@ -36,7 +38,7 @@ var (
   charactersImage   *ebiten.Image
 )
 
-type Game struct {
+type GameX struct {
   Grid         *sprites.Grid
   Spritesheets []*sprites.Spritesheet
   Sprites      []*sprites.Sprite
@@ -52,23 +54,23 @@ func init() {
   charactersImage = ebiten.NewImageFromImage(charactersImageIm)
 }
 
-func (g *Game) Update() error {
+func (g *GameX) Update() error {
   return nil
 }
 
-func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
+func (g *GameX) Layout(outsideWidth, outsideHeight int) (int, int) {
   return width, height
 }
 
-func (g *Game) Draw(screen *ebiten.Image) {
+func (g *GameX) Draw(screen *ebiten.Image) {
   // Draw each tile with each DrawImage call.
   // As the source images of all DrawImage calls are always same,
   // this rendering is done very efficiently.
   // For more detail, see https://pkg.go.dev/github.com/hajimehoshi/ebiten/v2#Image.DrawImage
 
-  for i, sprite := range g.Sprites {
-    sprite.GridDraw(screen, i, i)
-  }
+  //for i, sprite := range g.Sprites {
+  //  sprite.GridDraw(g, screen, i, i)
+  //}
 
   cx, cy := 0, 3
   t := 28
@@ -85,30 +87,42 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 func main() {
 
+  g := sprites.NewGame(16, 16)
+
+  ss1     := g.NewSpritesheet(tilesBytes, ss1TileWidth, ss1TileHeight, ss1TileXNum, ss1TileYNum)
+  ss1s29  := g.NewSprite(ss1, 29)
+
+  ss2     := g.NewSpritesheet(charactersBytes, ss2TileWidth, ss2TileHeight, ss2TileXNum, ss2TileYNum)
+  ss2s25  := g.NewSprite(ss2, 25)
+  ss2s22  := g.NewSprite(ss2, 22)
+
+  _,_,_    = ss1s29,ss2s25,ss2s22
+
+
   grid := &sprites.Grid{CellWidth: 16, CellHeight: 16}
 
-  g := &Game{
+  gx := &GameX{
     Grid:         grid,
     Spritesheets: make([]*sprites.Spritesheet, 0),
     Sprites:      make([]*sprites.Sprite, 0),
   }
 
   // -------------
-  ss1 := sprites.NewSpritesheet(tilesBytes, ss1TileWidth, ss1TileHeight, ss1TileXNum, grid)
-  g.Spritesheets = append(g.Spritesheets, ss1)
+  ssx1 := sprites.NewSpritesheet0(tilesBytes, ss1TileWidth, ss1TileHeight, ss1TileXNum, grid)
+  gx.Spritesheets = append(gx.Spritesheets, ssx1)
 
-  ss1s29 := ss1.NewSprite(29)
-  g.Sprites = append(g.Sprites, ss1s29)
+  ssx1s29 := ssx1.NewSprite(29)
+  gx.Sprites = append(gx.Sprites, ssx1s29)
 
   // -------------
-  ss2 := sprites.NewSpritesheet(charactersBytes, ss2TileWidth, ss2TileHeight, ss2TileXNum, grid)
-  g.Spritesheets = append(g.Spritesheets, ss2)
+  ssx2 := sprites.NewSpritesheet0(charactersBytes, ss2TileWidth, ss2TileHeight, ss2TileXNum, grid)
+  gx.Spritesheets = append(gx.Spritesheets, ssx2)
 
-  ss2s25 := ss2.NewSprite(25)
-  g.Sprites = append(g.Sprites, ss2s25)
+  ssx2s25 := ssx2.NewSprite(25)
+  gx.Sprites = append(gx.Sprites, ssx2s25)
 
-  ss2s22 := ss2.NewSprite(22)
-  g.Sprites = append(g.Sprites, ss2s22)
+  ssx2s22 := ssx2.NewSprite(22)
+  gx.Sprites = append(gx.Sprites, ssx2s22)
 
 
 
